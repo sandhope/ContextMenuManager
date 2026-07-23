@@ -1,0 +1,81 @@
+# EditorConfig —— 统一代码风格与编译期静态分析基线
+# 顶级配置，向上查找到此为止
+root = true
+
+##########################################################################
+# 通用格式
+##########################################################################
+[*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{csproj,props,targets,xml,manifest,appxmanifest,xaml,json,slnx}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+##########################################################################
+# C# 静态分析基线
+#
+# 项目由 WinForms + .NET Framework 4.0 版 ContextMenuManager 移植而来，
+# Core/ 层保留了原版的公共命名、常量与 COM/Win32 互操作写法。以下规则针对
+# 这些"有意为之"的移植约定统一降噪，使 dotnet build 干净通过（0 警告）；
+# 其余 Recommended 级别规则保持为警告，用于对新增代码持续把关。
+##########################################################################
+[*.cs]
+# --- 命名类约定（移植保留，禁止改名以免破坏跨层引用与算法语义）---
+# CA1707: 成员名含下划线（如 CLASSES_ROOT / MENUPATH_FILE / Win10_1507 枚举项）
+dotnet_diagnostic.CA1707.severity = none
+# CA1711: 以 "Ex" 结尾的类型名（GuidEx / RegistryEx，沿用原版命名习惯）
+dotnet_diagnostic.CA1711.severity = none
+# CA1720: 标识符包含类型名 "Guid"（领域概念本身即为 GUID，改名反而降低可读性）
+dotnet_diagnostic.CA1720.severity = none
+# CA1708: 仅大小写不同的成员名（ShellLink 互操作常量与属性并存）
+dotnet_diagnostic.CA1708.severity = none
+
+# --- 字段/初始化风格（移植保留的全局状态与显式默认值）---
+# CA2211: 非常量的可见静态字段（ShellScenes 全局当前上下文）
+dotnet_diagnostic.CA2211.severity = none
+# CA1051: 可见实例字段（COM 互操作结构体）
+dotnet_diagnostic.CA1051.severity = none
+# CA1805: 显式初始化为默认值（移植代码可读性偏好）
+dotnet_diagnostic.CA1805.severity = suggestion
+
+# --- 互操作 HRESULT（有意的 fire-and-forget COM/Win32 调用）---
+# CA1806: 未使用方法返回的 HRESULT（WinXHasher / MessageBoxW 等互操作）
+dotnet_diagnostic.CA1806.severity = suggestion
+
+# --- 区域性（哈希/路径归一化需保持原版行为，UI 格式化沿用当前区域性）---
+# CA1304 / CA1305 / CA1309 / CA1310 / CA1311: 未显式指定 CultureInfo / StringComparison / 序数比较
+# 保持为 suggestion —— 不阻断构建，但保留可见性以便未来评估。
+dotnet_diagnostic.CA1304.severity = suggestion
+dotnet_diagnostic.CA1305.severity = suggestion
+dotnet_diagnostic.CA1309.severity = suggestion
+dotnet_diagnostic.CA1310.severity = suggestion
+dotnet_diagnostic.CA1311.severity = suggestion
+
+# --- 性能/风格建议（不强制重构现有移植代码，保持 IDE 可见）---
+# CA1822: 成员可标记为 static（ViewModel 绑定/命令成员保留实例语义）
+dotnet_diagnostic.CA1822.severity = suggestion
+# CA1847: 单字符时使用 string.Contains(char)
+dotnet_diagnostic.CA1847.severity = suggestion
+# CA1861: 内联常量数组建议提取为 static readonly
+dotnet_diagnostic.CA1861.severity = suggestion
+# CA1866: 单字符时使用 StartsWith(char)
+dotnet_diagnostic.CA1866.severity = suggestion
+# CA1868: Remove 前的冗余 Contains 护卫
+dotnet_diagnostic.CA1868.severity = suggestion
+# CA1854 / CA1864: 字典优化（TryGetValue / TryAdd 替代 ContainsKey 护卫）
+dotnet_diagnostic.CA1854.severity = suggestion
+dotnet_diagnostic.CA1864.severity = suggestion
+
+# --- COM/Win32 互操作（签名/异常类型由互操作契约决定）---
+# CA1838: P/Invoke 使用 StringBuilder 参数（IShellLinkW 等互操作签名要求，不可更改）
+dotnet_diagnostic.CA1838.severity = none
+# CA2201: 抛出保留异常类型（COM 互操作场景沿用原版）
+dotnet_diagnostic.CA2201.severity = suggestion

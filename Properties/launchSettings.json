@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ContextMenuManager (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "ContextMenuManager (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

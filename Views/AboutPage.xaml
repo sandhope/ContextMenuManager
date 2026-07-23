@@ -1,0 +1,14 @@
+<Page
+    x:Class="ContextMenuManager.Views.AboutPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:loc="using:ContextMenuManager.Localization">
+
+    <ScrollViewer Padding="16">
+        <StackPanel Spacing="10" MaxWidth="640">
+            <TextBlock Text="{x:Bind loc:Loc.Tr('Page.AppTitle')}" FontSize="22" FontWeight="Bold" />
+            <TextBlock Text="{x:Bind About, Mode=OneTime}" TextWrapping="Wrap" />
+            <HyperlinkButton Content="{x:Bind loc:Loc.Tr('Page.GithubRepo')}" NavigateUri="https://github.com/sandhope/ContextMenuManager" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

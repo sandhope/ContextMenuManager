@@ -1,0 +1,36 @@
+<Window
+    x:Class="ContextMenuManager.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ContextMenuManager"
+    Title="Windows 右键管理">
+
+    <NavigationView x:Name="NavView"
+                    PaneDisplayMode="Left"
+                    OpenPaneLength="240"
+                    IsBackButtonVisible="Collapsed"
+                    IsSettingsVisible="False"
+                    AlwaysShowHeader="True"
+                    SelectionChanged="NavView_SelectionChanged"
+                    Loaded="NavView_Loaded">
+        <NavigationView.Resources>
+            <!-- 覆盖标题区默认边距（默认 56,44,0,0 会使标题相对内容明显右移并下沉，造成标题与内容不对齐）。
+                 改为左缩进 16，与各页面内容的统一左内边距对齐；顶部留白收紧到 18。 -->
+            <Thickness x:Key="NavigationViewHeaderMargin">16,18,0,0</Thickness>
+            <Thickness x:Key="NavigationViewMinimalHeaderMargin">16,18,0,0</Thickness>
+        </NavigationView.Resources>
+        <NavigationView.AutoSuggestBox>
+            <AutoSuggestBox x:Name="NavSearchBox" QueryIcon="Find"
+                            TextChanged="NavSearch_TextChanged"
+                            QuerySubmitted="NavSearch_QuerySubmitted"
+                            SuggestionChosen="NavSearch_SuggestionChosen" />
+        </NavigationView.AutoSuggestBox>
+        <NavigationView.HeaderTemplate>
+            <DataTemplate>
+                <TextBlock Text="{Binding}" FontSize="24" FontWeight="SemiBold"
+                           Margin="0,0,0,4" />
+            </DataTemplate>
+        </NavigationView.HeaderTemplate>
+        <Frame x:Name="ContentFrame" />
+    </NavigationView>
+</Window>

@@ -1,0 +1,15 @@
+<Page
+    x:Class="ContextMenuManager.Views.LanguagesPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:loc="using:ContextMenuManager.Localization">
+
+    <Grid Padding="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Text="{x:Bind loc:Loc.Tr('Page.SelectLanguage')}" Margin="0,0,0,8" />
+        <RadioButtons x:Name="LangList" Grid.Row="1" SelectionChanged="LangList_SelectionChanged" />
+    </Grid>
+</Page>

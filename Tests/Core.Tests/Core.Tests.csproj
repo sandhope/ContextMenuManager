@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- 与主项目相同的 Windows TFM，使 Core 层可直接使用注册表 / Win32 API -->
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsPublishable>false</IsPublishable>
+    <RootNamespace>ContextMenuManager.Core.Tests</RootNamespace>
+    <!-- 保持与主项目一致的构建约定：关闭并行（本项目无 XAML，仅统一约定） -->
+    <BuildInParallel>false</BuildInParallel>
+    <!-- 接入编译期分析器：沿用根 .editorconfig 基线 -->
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+  <!--
+    以"链接源码"方式复用 Core 纯逻辑：测试项目直接编译同一份 Core 源文件，
+    完全解耦 WinUI / Windows App SDK，无需引用 WinExe 应用程序集即可对
+    注册表路径解析、GUID 解析、INI 解析、字符串扩展等纯逻辑进行单元测试。
+  -->
+  <ItemGroup>
+    <Compile Include="..\..\Core\GuidEx.cs" Link="Core\GuidEx.cs" />
+    <Compile Include="..\..\Core\StringExtension.cs" Link="Core\StringExtension.cs" />
+    <Compile Include="..\..\Core\IniReader.cs" Link="Core\IniReader.cs" />
+    <Compile Include="..\..\Core\RegistryEx.cs" Link="Core\RegistryEx.cs" />
+    <Compile Include="..\..\Core\RegistryAccessException.cs" Link="Core\RegistryAccessException.cs" />
+    <Compile Include="..\..\Core\RegTrustedInstaller.cs" Link="Core\RegTrustedInstaller.cs" />
+  </ItemGroup>
+
+</Project>

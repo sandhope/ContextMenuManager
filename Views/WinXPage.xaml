@@ -1,0 +1,96 @@
+<Page
+    x:Class="ContextMenuManager.Views.WinXPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:loc="using:ContextMenuManager.Localization"
+    xmlns:vm="using:ContextMenuManager.ViewModels">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <CommandBar Grid.Row="0" DefaultLabelPosition="Right">
+            <AppBarButton Icon="Add" Label="{x:Bind loc:Loc.Tr('Page.AddItem')}" Click="AddItem_Click" />
+            <AppBarButton Icon="NewFolder" Label="{x:Bind loc:Loc.Tr('Page.NewGroup')}" Click="NewGroup_Click" />
+            <AppBarButton Icon="Folder" Label="{x:Bind loc:Loc.Tr('Page.OpenFolder')}" Click="OpenFolderButton_Click" />
+            <AppBarButton Icon="Refresh" Label="{x:Bind loc:Loc.Tr('ToolBar.Refresh')}" Click="RefreshButton_Click" />
+            <AppBarSeparator />
+            <AppBarButton Icon="Undo" Label="{x:Bind loc:Loc.Tr('Page.RestoreDefault')}" Click="RestoreButton_Click" />
+        </CommandBar>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ListView Grid.Column="0" x:Name="GroupList"
+                      ItemsSource="{x:Bind VM.Groups, Mode=OneWay}"
+                      SelectedItem="{x:Bind VM.SelectedGroup, Mode=TwoWay}"
+                      SelectionMode="Single" Padding="4">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:WinXGroupNode">
+                        <StackPanel Orientation="Horizontal" Spacing="8" Margin="4" VerticalAlignment="Center">
+                            <FontIcon Glyph="&#xE8B7;" FontSize="18" />
+                            <TextBlock Text="{x:Bind Name}" FontSize="14" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <Grid Grid.Column="1">
+            <ListView x:Name="ItemList"
+                      ItemsSource="{x:Bind VM.SelectedGroup.Children, Mode=OneWay}"
+                      SelectionMode="None" Padding="16,4,16,8">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Margin" Value="0,3" />
+                        <Setter Property="MinHeight" Value="0" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:WinXItemNode">
+                        <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1" CornerRadius="6" Padding="14,9">
+                            <Grid ColumnSpacing="12" VerticalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <FontIcon Grid.Column="0" Glyph="&#xE8A5;" FontSize="18" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="{x:Bind Name}" FontSize="14" FontWeight="SemiBold"
+                                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                <Button Grid.Column="2" Click="DeleteButton_Click"
+                                        Background="Transparent" BorderThickness="0" Padding="8"
+                                        VerticalAlignment="Center" ToolTipService.ToolTip="{x:Bind loc:Loc.Tr('Page.Delete')}">
+                                    <FontIcon Glyph="&#xE74D;" FontSize="16" />
+                                </Button>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+                <!-- 空状态：当前分组无项目时给出友好占位 -->
+                <StackPanel x:Name="EmptyState" Visibility="Collapsed"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Spacing="10" MaxWidth="360">
+                    <FontIcon Glyph="&#xE7C3;" FontSize="40" Opacity="0.35" />
+                    <TextBlock Text="{x:Bind loc:Loc.Tr('Status.EmptyList')}"
+                               HorizontalAlignment="Center" TextAlignment="Center"
+                               TextWrapping="Wrap" Opacity="0.7"
+                               Style="{StaticResource BodyTextBlockStyle}" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <TextBlock Grid.Row="2" Text="{x:Bind VM.StatusText, Mode=OneWay}" Padding="16,6" Opacity="0.7" />
+    </Grid>
+</Page>

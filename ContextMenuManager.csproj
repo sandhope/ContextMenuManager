@@ -1,0 +1,106 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>ContextMenuManager</RootNamespace>
+    <AssemblyName>ContextMenuManager</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Platforms>x86;x64;ARM64</Platforms>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">win-$([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString().ToLowerInvariant())</RuntimeIdentifier>
+    <PublishProfile Condition="Exists('Properties\PublishProfiles\win-$(Platform).pubxml')">win-$(Platform).pubxml</PublishProfile>
+    <UseWinUI>true</UseWinUI>
+    <WinUISDKReferences>false</WinUISDKReferences>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <WindowsPackageType>None</WindowsPackageType>
+    <!-- 避免 WinUI XAML 标记编译器在并行编译下偶发丢失 LocalAssembly（WMC1509）导致误报 XAML 错误 -->
+    <BuildInParallel>false</BuildInParallel>
+    <XamlEnableMarkupCompilationInParallel>false</XamlEnableMarkupCompilationInParallel>
+  </PropertyGroup>
+
+  <!-- 编译期静态分析：接入 .NET Roslyn 分析器与代码风格检查，作为变更校验路径的一部分。
+       严重级别由根 .editorconfig 统一治理，保证 dotnet build 干净通过（0 警告）。 -->
+  <PropertyGroup>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <AnalysisMode>Recommended</AnalysisMode>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!-- 压制 Windows SDK 自带程序集（Microsoft.Windows.SDK.NET / WinRT.Runtime）的裁剪汇总提示 IL2104，
+         与 WinUIClash 一致；其余裁剪警告（如 Core 层 COM P/Invoke 的 IL2050）不阻断发布。 -->
+    <NoWarn>$(NoWarn);IL2104</NoWarn>
+  </PropertyGroup>
+
+  <!-- 测试工程（Tests\）位于主项目目录之下，需将其从主项目的默认项 glob 中排除，
+       避免测试源文件与其 bin/obj 产物被 SDK 隐式纳入主应用编译。 -->
+  <ItemGroup>
+    <Compile Remove="Tests\**" />
+    <Page Remove="Tests\**" />
+    <None Remove="Tests\**" />
+    <PRIResource Remove="Tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\SplashScreen.scale-200.png" />
+    <Content Include="Assets\LockScreenLogo.scale-200.png" />
+    <Content Include="Assets\Square150x150Logo.scale-200.png" />
+    <Content Include="Assets\Square44x44Logo.scale-200.png" />
+    <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+    <Content Include="Assets\Square44x44Logo.targetsize-48_altform-lightunplated.png" />
+    <Content Include="Assets\StoreLogo.png" />
+    <Content Include="Assets\AppIcon.ico" />
+    <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+    <Content Include="Dictionaries\EnhanceMenusDic.xml" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="sponsor\alipay.jpg" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="sponsor\weixin.jpg" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Manifest Include="$(ApplicationManifest)" />
+  </ItemGroup>
+
+  <!--
+    Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
+    Tools extension to be activated for this project even if the Windows App SDK Nuget
+    package has not yet been restored.
+  -->
+  <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+    <ProjectCapability Include="Msix" />
+  </ItemGroup>
+
+  <!--
+    Microsoft.Windows.SDK.BuildTools.WinApp adds first-class support for
+    `dotnet run` on packaged WinUI apps: it hooks the .NET CLI Run target to
+    register a debug identity via the winapp CLI and launch the app with
+    package identity (AUMID).
+    Set <EnableWinAppRunSupport>false</EnableWinAppRunSupport> in a
+    <PropertyGroup> above to opt out.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.3.1" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools.WinApp" Version="0.5.0" />
+    <!-- 显式引入最新版 CsWinRT，用源生成器代替反射，从根本上解决裁剪（IL2xxx）警告与运行期 NullReferenceException -->
+    <PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.2.0" />
+  </ItemGroup>
+
+  <!--
+    Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution
+    Explorer "Package and Publish" context menu entry to be enabled for this project even if
+    the Windows App SDK Nuget package has not yet been restored.
+  -->
+  <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+    <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
+  </PropertyGroup>
+
+  <!-- Publish Properties -->
+  <PropertyGroup>
+    <PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
+    <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
+    <PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
+    <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
+    <!-- 允许不安全代码，让新版 CsWinRT 放弃反射生成，直接用 Source Generator 绕过裁剪限制 -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+</Project>
