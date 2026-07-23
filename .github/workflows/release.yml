@@ -169,12 +169,43 @@ jobs:
       - name: List artifacts
         run: ls -la dist
 
+      - name: Compose release body (English download guide + auto notes)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # 1) Let GitHub auto-generate the "What's Changed" section from commits/PRs.
+          gh api repos/${{ github.repository }}/releases/generate-notes \
+            -f tag_name="${{ github.ref_name }}" \
+            -f target_commitish="${{ github.sha }}" \
+            --jq '.body' > auto_notes.md || echo "" > auto_notes.md
+
+          # 2) Write the English file guide header.
+          cat > release_body.md <<'EOF'
+          ## 📦 Which file should I download?
+
+          | File | What it is | Who should use it |
+          |------|-----------|-------------------|
+          | `ContextMenuManager-<ver>-win-x64.zip` | **Portable build** — unzip and run `ContextMenuManager.exe`. No installation, no admin rights required. | Most users on Intel/AMD PCs who just want to run it. |
+          | `ContextMenuManager-Setup-<ver>-win-x64.exe` | **Installer** (Inno Setup) — installs to `Program Files`, adds Start Menu + desktop shortcuts and an uninstaller. | Users who want a proper install with shortcuts. |
+          | `ContextMenuManager-<ver>-win-arm64.zip` | Portable build for **ARM64** devices. | Only for ARM-based Windows PCs (e.g. Snapdragon X). |
+          | `ContextMenuManager-Setup-<ver>-win-arm64.exe` | Installer for **ARM64** devices. | Only for ARM-based Windows PCs (e.g. Snapdragon X). |
+          | `*.sha256` | SHA-256 checksum files — verify your download was not corrupted. | Anyone who wants to verify integrity. |
+
+          > **Architecture:** pick **x64** unless you specifically have an ARM64 Windows device.
+          > **Portable vs Installer:** the portable zip is self-contained and leaves no traces; the installer registers the app system-wide and creates shortcuts.
+
+          ## What's Changed
+          EOF
+
+          # 3) Append the auto-generated notes (if any).
+          cat auto_notes.md >> release_body.md
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: ContextMenuManager ${{ github.ref_name }}
-          generate_release_notes: true
+          body_path: release_body.md
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}
           files: |
