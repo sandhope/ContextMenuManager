@@ -179,20 +179,22 @@ jobs:
             -f target_commitish="${{ github.sha }}" \
             --jq '.body' > auto_notes.md || echo "" > auto_notes.md
 
-          # 2) Write the English file guide header.
+          # 2) Write the bilingual (EN + ZH) file guide header.
           cat > release_body.md <<'EOF'
-          ## 📦 Which file should I download?
+          ## 📦 Which file should I download? / 该下载哪个文件？
 
-          | File | What it is | Who should use it |
-          |------|-----------|-------------------|
-          | `ContextMenuManager-<ver>-win-x64.zip` | **Portable build** — unzip and run `ContextMenuManager.exe`. No installation, no admin rights required. | Most users on Intel/AMD PCs who just want to run it. |
-          | `ContextMenuManager-Setup-<ver>-win-x64.exe` | **Installer** (Inno Setup) — installs to `Program Files`, adds Start Menu + desktop shortcuts and an uninstaller. | Users who want a proper install with shortcuts. |
-          | `ContextMenuManager-<ver>-win-arm64.zip` | Portable build for **ARM64** devices. | Only for ARM-based Windows PCs (e.g. Snapdragon X). |
-          | `ContextMenuManager-Setup-<ver>-win-arm64.exe` | Installer for **ARM64** devices. | Only for ARM-based Windows PCs (e.g. Snapdragon X). |
-          | `*.sha256` | SHA-256 checksum files — verify your download was not corrupted. | Anyone who wants to verify integrity. |
+          | File | What it is | 中文说明 | Who should use it |
+          |------|-----------|---------|-------------------|
+          | `ContextMenuManager-<ver>-win-x64.zip` | **Portable build** — unzip and run `ContextMenuManager.exe`. No installation, no admin rights required. | **便携版** — 解压后直接运行 `ContextMenuManager.exe`，无需安装、无需管理员权限。 | Most users on Intel/AMD PCs who just want to run it. |
+          | `ContextMenuManager-Setup-<ver>-win-x64.exe` | **Installer** (Inno Setup) — installs to `Program Files`, adds Start Menu + desktop shortcuts and an uninstaller. | **安装版**（Inno Setup）— 安装到 `Program Files`，并创建开始菜单 / 桌面快捷方式与卸载项。 | Users who want a proper install with shortcuts. |
+          | `ContextMenuManager-<ver>-win-arm64.zip` | Portable build for **ARM64** devices. | **便携版**（ARM64）— 适用于 ARM 架构设备。 | Only for ARM-based Windows PCs (e.g. Snapdragon X). |
+          | `ContextMenuManager-Setup-<ver>-win-arm64.exe` | Installer for **ARM64** devices. | **安装版**（ARM64）— 适用于 ARM 架构设备。 | Only for ARM-based Windows PCs (e.g. Snapdragon X). |
+          | `*.sha256` | SHA-256 checksum files — verify your download was not corrupted. | **SHA-256 校验文件** — 用于核对下载文件是否完整未被篡改。 | Anyone who wants to verify integrity. |
 
           > **Architecture:** pick **x64** unless you specifically have an ARM64 Windows device.
+          > **架构：** 除非你使用的是 ARM64 设备（如骁龙本），否则请选择 **x64**。
           > **Portable vs Installer:** the portable zip is self-contained and leaves no traces; the installer registers the app system-wide and creates shortcuts.
+          > **便携版 vs 安装版：** 便携版为单文件夹、不写注册表；安装版会在系统中注册应用并创建快捷方式。
 
           ## What's Changed
           EOF
